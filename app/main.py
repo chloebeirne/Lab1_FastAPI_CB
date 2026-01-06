@@ -2,20 +2,11 @@ from fastapi import FastAPI, HTTPException, status
 from .schemas import User
 
 users: list[User] = []
-
 app = FastAPI()
 
 @app.get("/hello")
 def hello():
     return {"message": "Hello, World!"}
-
-# app/main.py
-from fastapi import FastAPI, HTTPException, status
-from .schemas import User
-
-app = FastAPI()
-
-users: list[User] = []
 
 @app.get("/api/users")
 def get_users():
@@ -35,5 +26,31 @@ def add_user(user: User):
     users.append(user)
     return user
 
+@app.put("/api/users/{user_id}")
+def update_user(user_id: int, updated_user: User):
+    for u in users:
+        if u.user_id == user_id:
+            if updated_user.user_id != user_id:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="user_id in body must match user_id in path"
+                )
+            users[i] = updated_user
+            return updated_user
 
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="User not found"
+    )
 
+@app.delete("/api/users/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_user(user_id: int):
+    for u in users:
+        if u.user_id == user_id:
+            users.pop(i)
+            return 
+
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="User not found"
+    )
